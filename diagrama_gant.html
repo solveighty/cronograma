@@ -953,6 +953,17 @@
                 priority: 'Alta',
                 progress: 0
             },
+            {
+                id: 'task2.3',
+                type: 'task',
+                name: 'Tarea 2.3: Selección y justificación del modelo de IA generativa',
+                objective: 2,
+                duration: 4,
+                startDate: '2025-11-01',
+                endDate: '2025-11-05',
+                priority: 'Alta',
+                progress: 0
+            },
             // Objective 3
             {
                 id: 'obj3',
@@ -1127,23 +1138,24 @@
             const start = new Date(startDate);
             const end = new Date(endDate);
             const spans = [];
-            
-            timeline.forEach(month => {
-                month.weeks.forEach((week, weekIndex) => {
+
+            timeline.forEach((month, monthIdx) => {
+                month.weeks.forEach((week, weekIdx) => {
                     const weekStart = new Date(week.start);
                     const weekEnd = new Date(week.end);
-                    
-                    if (start <= weekEnd && end >= weekStart) {
+
+                    // Solo incluye la semana si hay al menos un día en común
+                    if (weekEnd >= start && weekStart <= end) {
                         spans.push({
-                            monthIndex: timeline.indexOf(month),
-                            weekIndex: weekIndex,
+                            monthIndex: monthIdx,
+                            weekIndex: weekIdx,
                             month: month.month,
                             week: week.label
                         });
                     }
                 });
             });
-            
+
             return spans;
         }
 
@@ -1200,7 +1212,7 @@
                         <div class="task-info">
                             <div class="task-name">${item.name}</div>
                             <div class="task-details">
-                                ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}
+                                ${start.toLocaleDateString('es-ES', { timeZone: 'UTC' })} - ${end.toLocaleDateString('es-ES', { timeZone: 'UTC' })}
                             </div>
                             <div class="task-meta">
                                 <span class="task-duration">${duration} días</span>
