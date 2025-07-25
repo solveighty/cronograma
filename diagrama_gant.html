@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto de Investigación - TeamGantt</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fc;
+            color: #2d3748;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        /* Header Navigation */
+        .app-header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #4c51bf;
+        }
+
+        .app-logo i {
+            font-size: 24px;
+        }
+
+        .app-nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-item {
+            color: #718096;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active {
+            color: #4c51bf;
+            border-bottom-color: #4c51bf;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Project Header */
+        .project-header {
+            background: #fff;
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .project-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .project-title h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .project-status {
+            background: #48bb78;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 32px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: #fff;
+            padding: 16px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #718096;
+            transition: all 0.2s;
+        }
+
+        .view-btn.active {
+            background: #4c51bf;
+            color: white;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        .btn-primary {
+            background: #4c51bf;
+            color: white;
+            border-color: #4c51bf;
+        }
+
+        .btn-primary:hover {
+            background: #434190;
+        }
+
+        /* Main Content */
+        .main-content {
+            background: #fff;
+            min-height: calc(100vh - 140px);
+        }
+
+        /* Gantt Container */
+        .gantt-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gantt-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+        }
+
+        .gantt-table th,
+        .gantt-table td {
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .gantt-table th {
+            background: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Task Column */
+        .task-column {
+            width: 400px;
+            min-width: 400px;
+            background: #fff;
+            border-right: 2px solid #e2e8f0;
+        }
+
+        .task-header {
+            padding: 16px 20px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .task-cell {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fff;
+            transition: background-color 0.2s;
+        }
+
+        .task-cell:hover {
+            background: #f8fafc;
+        }
+
+        .task-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .task-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .task-icon-1 { background: #4A90E2; }
+        .task-icon-2 { background: #7ED321; }
+        .task-icon-3 { background: #F8E71C; }
+        .task-icon-4 { background: #F5A623; }
+        .task-icon-5 { background: #D0021B; }
+
+        .task-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 15px;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .task-details {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .task-duration {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .task-priority {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Timeline Headers */
+        .month-header {
+            background: #4a5568 !important;
+            color: white !important;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 12px 8px !important;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .week-header {
+            background: #718096 !important;
+            color: white !important;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 10px 8px !important;
+            min-width: 120px;
+            width: 120px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        /* Timeline Cells */
+        .timeline-cell {
+            position: relative;
+            padding: 12px 8px !important;
+            min-width: 120px;
+            width: 120px;
+            background: #fff;
+            vertical-align: middle;
+        }
+
+        .timeline-cell:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        /* Gantt Bars */
+        .gantt-bar {
+            height: 28px;
+            border-radius: 14px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .gantt-bar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .gantt-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            border-radius: inherit;
+        }
+
+        .bar-objetivo-1 { background: linear-gradient(135deg, #4A90E2 0%, #4A90E2 100%); }
+        .bar-objetivo-2 { background: linear-gradient(135deg, #7ED321 0%, #7ED321 100%); }
+        .bar-objetivo-3 { background: linear-gradient(135deg, #F8E71C 0%, #F8E71C 100%); }
+        .bar-objetivo-4 { background: linear-gradient(135deg, #F5A623 0%, #F5A623 100%); }
+        .bar-objetivo-5 { background: linear-gradient(135deg, #D0021B 0%, #D0021B 100%); }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: #2d3748;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            max-width: 320px;
+            line-height: 1.4;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            border: 6px solid transparent;
+            border-top-color: #2d3748;
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            right: 2px;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .task-column {
+                width: 350px;
+                min-width: 350px;
+            }
+            
+            .project-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 0 16px;
+            }
+            
+            .project-header {
+                padding: 16px;
+            }
+            
+            .toolbar {
+                padding: 12px 16px;
+            }
+            
+            .task-column {
+                width: 300px;
+                min-width: 300px;
+            }
+        }
+
+        .task-row-subtask {
+            padding-left: 40px;
+            background: #fafbfc;
+        }
+
+        .task-row-subtask .task-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .task-row-subtask .task-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .task-row-subtask .task-details {
+            font-size: 12px;
+        }
+
+        .subtask-bar {
+            height: 20px;
+            border-radius: 10px;
+            opacity: 0.8;
+        }
+
+        .objective-row {
+            background: #f7fafc !important;
+            border-left: 4px solid;
+        }
+
+        .objective-row-1 { border-left-color: #4A90E2; }
+        .objective-row-2 { border-left-color: #7ED321; }
+        .objective-row-3 { border-left-color: #F8E71C ; }
+        .objective-row-4 { border-left-color: #F5A623 ; }
+        .objective-row-5 { border-left-color: #D0021B; }
+
+        /* Export functionality */
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .export-modal.active {
+            display: flex;
+        }
+
+        .export-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .export-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .export-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .export-options {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .export-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-option:hover {
+            background: #f7fafc;
+            border-color: #4c51bf;
+        }
+
+        .export-option.selected {
+            background: #edf2f7;
+            border-color: #4c51bf;
+        }
+
+        .export-option-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .export-option-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4c51bf;
+            color: white;
+        }
+
+        .export-option-details h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .export-option-details p {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .export-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #f7fafc;
+            color: #4a5568;
+            border-color: #e2e8f0;
+        }
+
+        .btn-cancel:hover {
+            background: #edf2f7;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+            padding: 32px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #4c51bf;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="app-logo">
+            <i class="fas fa-chart-gantt"></i>
+            TeamGantt
+        </div>
+        <nav class="app-nav">
+            <a href="#" class="nav-item active">Proyectos</a>
+            <a href="#" class="nav-item">Mi Trabajo</a>
+            <a href="#" class="nav-item">Reportes</a>
+            <a href="#" class="nav-item">Equipo</a>
+        </nav>
+        <div class="user-menu">
+            <button class="btn">
+                <i class="fas fa-bell"></i>
+            </button>
+            <div class="user-avatar">JD</div>
+        </div>
+    </header>
+
+    <!-- Project Header -->
+    <div class="project-header">
+        <div class="project-title">
+            <h1>Proyecto de Investigación - Comparación de Herramientas</h1>
+            <span class="project-status">En Progreso</span>
+        </div>
+        <div class="project-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <span>Oct 1, 2025 - Ene 10, 2026</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-users"></i>
+                <span>Equipo de Investigación</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-tasks"></i>
+                <span>5 Objetivos • 15 Tareas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="view-toggle">
+                <button class="view-btn active">
+                    <i class="fas fa-chart-gantt"></i>
+                    Gantt
+                </button>
+                <button class="view-btn">
+                    <i class="fas fa-list"></i>
+                    Lista
+                </button>
+                <button class="view-btn">
+                    <i class="fas fa-calendar"></i>
+                    Calendario
+                </button>
+            </div>
+            <button class="btn">
+                <i class="fas fa-filter"></i>
+                Filtrar
+            </button>
+        </div>
+        <div class="toolbar-right">
+            <button class="btn" onclick="showExportModal()">
+                <i class="fas fa-share"></i>
+                Compartir
+            </button>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Nueva Tarea
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="gantt-container">
+            <table class="gantt-table" id="ganttTable">
+                <thead id="ganttHeader">
+                    <!-- Header will be generated by JavaScript -->
+                </thead>
+                <tbody id="ganttBody">
+                    <!-- Content will be generated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- Export Modal -->
+    <div class="export-modal" id="exportModal">
+        <div class="export-content">
+            <div class="export-header">
+                <div class="export-option-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h3>Exportar Diagrama de Gantt</h3>
+            </div>
+            
+            <div class="export-options">
+                <div class="export-option selected" data-option="word-landscape" onclick="selectExportOption('word-landscape')">
+                    <div class="export-option-info">
+                        <div class="export-option-icon">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <div class="export-option-details">
+                            <h4>Word Horizontal</h4>
+                            <p>Optimizado para páginas horizontales en Word (11x8.5")</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-check" style="color: #4c51bf;"></i>
+                </div>
+                
+                <div class="export-option" data-option="word-landscape-hd" onclick="selectExportOption('word-landscape-hd')">
+                    <div class="export-option-info">
+                        <div class="export-option-icon">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <div class="export-option-details">
+                            <h4>Word Horizontal HD</h4>
+                            <p>Alta resolución para Word horizontal (2200x1700px)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="export-option" data-option="word-a4-landscape" onclick="selectExportOption('word-a4-landscape')">
+                    <div class="export-option-info">
+                        <div class="export-option-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="export-option-details">
+                            <h4>A4 Horizontal</h4>
+                            <p>Formato A4 horizontal para documentos internacionales</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="export-option" data-option="presentation" onclick="selectExportOption('presentation')">
+                    <div class="export-option-info">
+                        <div class="export-option-icon">
+                            <i class="fas fa-presentation-screen"></i>
+                        </div>
+                        <div class="export-option-details">
+                            <h4>Presentación</h4>
+                            <p>16:9 para PowerPoint y presentaciones (1920x1080px)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="export-actions">
+                <button class="btn btn-cancel" onclick="hideExportModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" onclick="exportGanttChart()">
+                    <i class="fas fa-download"></i>
+                    Exportar PNG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Capturando diagrama en alta resolución...</div>
+        </div>
+    </div>
+
+    <script>
+        // Project data with objectives and subtasks
+        const projectData = [
+            // Objective 1
+            {
+                id: 'obj1',
+                type: 'objective',
+                name: 'Objetivo 1: Revisión de literatura',
+                objective: 1,
+                startDate: '2025-10-01',
+                endDate: '2025-10-24',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task1.1',
+                type: 'task',
+                name: 'Tarea 1.1: Revisión de literatura científica',
+                objective: 1,
+                duration: 10,
+                startDate: '2025-10-01',
+                endDate: '2025-10-10',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task1.2',
+                type: 'task',
+                name: 'Tarea 1.2: Análisis de herramientas',
+                objective: 1,
+                duration: 7,
+                startDate: '2025-10-11',
+                endDate: '2025-10-17',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task1.3',
+                type: 'task',
+                name: 'Tarea 1.3: Síntesis y definición de variables y métricas',
+                objective: 1,
+                duration: 7,
+                startDate: '2025-10-18',
+                endDate: '2025-10-24',
+                priority: 'Alta',
+                progress: 0
+            },
+            // Objective 2
+            {
+                id: 'obj2',
+                type: 'objective',
+                name: 'Objetivo 2: Selección de Herramientas',
+                objective: 2,
+                startDate: '2025-10-25',
+                endDate: '2025-11-05',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task2.1',
+                type: 'task',
+                name: 'Tarea 2.1: Selección y configuración de Spring PetClinic (SUT)',
+                objective: 2,
+                duration: 7,
+                startDate: '2025-10-25',
+                endDate: '2025-10-31',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task2.2',
+                type: 'task',
+                name: 'Tarea 2.2: Definición de criterios técnicos de comparación',
+                objective: 2,
+                duration: 5,
+                startDate: '2025-11-01',
+                endDate: '2025-11-05',
+                priority: 'Alta',
+                progress: 0
+            },
+            // Objective 3
+            {
+                id: 'obj3',
+                type: 'objective',
+                name: 'Objetivo 3: Diseño Experimental',
+                objective: 3,
+                startDate: '2025-11-06',
+                endDate: '2025-11-20',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task3.1',
+                type: 'task',
+                name: 'Tarea 3.1: Configurar ambiente de pruebas y entorno controlado',
+                objective: 3,
+                duration: 10,
+                startDate: '2025-11-06',
+                endDate: '2025-11-15',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task3.2',
+                type: 'task',
+                name: 'Tarea 3.2: Validar herramientas de medición',
+                objective: 3,
+                duration: 5,
+                startDate: '2025-11-16',
+                endDate: '2025-11-20',
+                priority: 'Alta',
+                progress: 0
+            },
+            // Objective 4
+            {
+                id: 'obj4',
+                type: 'objective',
+                name: 'Objetivo 4: Generación de casos de prueba',
+                objective: 4,
+                startDate: '2025-11-21',
+                endDate: '2025-12-20',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task4.1',
+                type: 'task',
+                name: 'Tarea 4.1: Generar casos automáticos',
+                objective: 4,
+                duration: 10,
+                startDate: '2025-11-21',
+                endDate: '2025-11-30',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task4.2',
+                type: 'task',
+                name: 'Tarea 4.2: Generar casos manuales por experto',
+                objective: 4,
+                duration: 10,
+                startDate: '2025-12-01',
+                endDate: '2025-12-10',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task4.3',
+                type: 'task',
+                name: 'Tarea 4.3: Ejecutar pruebas y recolectar métricas',
+                objective: 4,
+                duration: 10,
+                startDate: '2025-12-11',
+                endDate: '2025-12-20',
+                priority: 'Alta',
+                progress: 0
+            },
+            // Objective 5
+            {
+                id: 'obj5',
+                type: 'objective',
+                name: 'Objetivo 5: Análisis de resultados',
+                objective: 5,
+                startDate: '2025-12-21',
+                endDate: '2026-01-10',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task5.1',
+                type: 'task',
+                name: 'Tarea 5.1: Análisis estadístico: descriptiva, t-test, supuestos',
+                objective: 5,
+                duration: 7,
+                startDate: '2025-12-21',
+                endDate: '2025-12-27',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task5.2',
+                type: 'task',
+                name: 'Tarea 5.2: Interpretación de resultados',
+                objective: 5,
+                duration: 5,
+                startDate: '2025-12-28',
+                endDate: '2026-01-02',
+                priority: 'Alta',
+                progress: 0
+            },
+            {
+                id: 'task5.3',
+                type: 'task',
+                name: 'Tarea 5.3: Redacción, revisión y publicación.',
+                objective: 5,
+                duration: 15,
+                startDate: '2026-01-03',
+                endDate: '2026-01-17',
+                priority: 'Alta',
+                progress: 0
+            }
+        ];
+
+        // Generate weekly timeline structure
+        function generateWeeklyTimeline() {
+            const timeline = [];
+            
+            timeline.push({
+                month: 'Octubre 2025',
+                weeks: [
+                    { label: 'Semana 1', start: '2025-10-01', end: '2025-10-07' },
+                    { label: 'Semana 2', start: '2025-10-08', end: '2025-10-14' },
+                    { label: 'Semana 3', start: '2025-10-15', end: '2025-10-21' },
+                    { label: 'Semana 4', start: '2025-10-22', end: '2025-10-31' }
+                ]
+            });
+            
+            timeline.push({
+                month: 'Noviembre 2025',
+                weeks: [
+                    { label: 'Semana 1', start: '2025-11-01', end: '2025-11-07' },
+                    { label: 'Semana 2', start: '2025-11-08', end: '2025-11-14' },
+                    { label: 'Semana 3', start: '2025-11-15', end: '2025-11-21' },
+                    { label: 'Semana 4', start: '2025-11-22', end: '2025-11-30' }
+                ]
+            });
+            
+            timeline.push({
+                month: 'Diciembre 2025',
+                weeks: [
+                    { label: 'Semana 1', start: '2025-12-01', end: '2025-12-07' },
+                    { label: 'Semana 2', start: '2025-12-08', end: '2025-12-14' },
+                    { label: 'Semana 3', start: '2025-12-15', end: '2025-12-21' },
+                    { label: 'Semana 4', start: '2025-12-22', end: '2025-12-31' }
+                ]
+            });
+            
+            timeline.push({
+                month: 'Enero 2026',
+                weeks: [
+                    { label: 'Semana 1', start: '2026-01-01', end: '2026-01-07' },
+                    { label: 'Semana 2', start: '2026-01-08', end: '2026-01-14' }
+                ]
+            });
+            
+            return timeline;
+        }
+
+        // Calculate which weeks an objective spans
+        function calculateWeekSpan(startDate, endDate, timeline) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const spans = [];
+            
+            timeline.forEach(month => {
+                month.weeks.forEach((week, weekIndex) => {
+                    const weekStart = new Date(week.start);
+                    const weekEnd = new Date(week.end);
+                    
+                    if (start <= weekEnd && end >= weekStart) {
+                        spans.push({
+                            monthIndex: timeline.indexOf(month),
+                            weekIndex: weekIndex,
+                            month: month.month,
+                            week: week.label
+                        });
+                    }
+                });
+            });
+            
+            return spans;
+        }
+
+        // Generate table header
+        function generateTableHeader() {
+            const timeline = generateWeeklyTimeline();
+            let headerHTML = `
+                <tr>
+                    <th class="task-column task-header">Objetivos del Proyecto</th>
+            `;
+            
+            timeline.forEach(month => {
+                headerHTML += `<th class="month-header" colspan="${month.weeks.length}">${month.month}</th>`;
+            });
+            
+            headerHTML += `</tr><tr>
+                <th class="task-column"></th>
+            `;
+            
+            timeline.forEach(month => {
+                month.weeks.forEach(week => {
+                    headerHTML += `<th class="week-header">${week.label}</th>`;
+                });
+            });
+            
+            headerHTML += '</tr>';
+            return headerHTML;
+        }
+
+        // Generate Gantt chart body
+        function generateGanttBody() {
+            const timeline = generateWeeklyTimeline();
+            let bodyHTML = '';
+            
+            projectData.forEach(item => {
+                const weekSpans = calculateWeekSpan(item.startDate, item.endDate, timeline);
+        const isObjective = item.type === 'objective';
+        const barClass = isObjective ? `bar-objetivo-${item.objective}` : `bar-objetivo-${item.objective} subtask-bar`;
+        
+        const start = new Date(item.startDate);
+        const end = new Date(item.endDate);
+        const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        
+        const rowClass = isObjective ? `objective-row objective-row-${item.objective}` : 'task-row-subtask';
+        const cellClass = isObjective ? 'task-cell' : 'task-cell task-row-subtask';
+        
+        bodyHTML += `
+            <tr class="${rowClass}">
+                <td class="task-column ${cellClass}">
+                    <div class="task-row">
+                        <div class="task-icon ${isObjective ? `task-icon-${item.objective}` : ''}">
+                            <i class="fas ${isObjective ? 'fa-flag' : 'fa-circle'}"></i>
+                        </div>
+                        <div class="task-info">
+                            <div class="task-name">${item.name}</div>
+                            <div class="task-details">
+                                ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}
+                            </div>
+                            <div class="task-meta">
+                                <span class="task-duration">${duration} días</span>
+                                <span class="task-priority">${item.priority}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+        `;
+        
+        let weekIndex = 0;
+        timeline.forEach(month => {
+            month.weeks.forEach(week => {
+                const isSpanned = weekSpans.some(span => 
+                    span.monthIndex === timeline.indexOf(month) && 
+                    span.weekIndex === month.weeks.indexOf(week)
+                );
+                
+                if (isSpanned) {
+                    const isFirstWeek = weekSpans[0].monthIndex === timeline.indexOf(month) && 
+                                      weekSpans[0].weekIndex === month.weeks.indexOf(week);
+                    
+                    if (isFirstWeek) {
+                        const spanLength = weekSpans.length;
+                        const displayText = isObjective ? `Objetivo ${item.objective}` : `${duration}d`;
+                        
+                        bodyHTML += `
+                            <td class="timeline-cell" colspan="${spanLength}">
+                                <div class="gantt-bar ${barClass}" 
+                                     style="width: calc(100% - 4px);"
+                                     data-tooltip="<strong>${item.name}</strong><br><br><strong>Duración:</strong> ${duration} días<br><strong>Período:</strong> ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}<br><strong>Prioridad:</strong> ${item.priority}">
+                                    <span style="position: relative; z-index: 1;">${displayText}</span>
+                                    <div class="progress-indicator">
+                                        <div class="progress-bar" style="width: ${item.progress}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                        weekIndex += spanLength - 1;
+                    }
+                } else {
+                    if (!weekSpans.some(span => {
+                        const currentMonthIndex = timeline.indexOf(month);
+                        const currentWeekIndex = month.weeks.indexOf(week);
+                        return currentMonthIndex === span.monthIndex && 
+                               currentWeekIndex > span.weekIndex && 
+                               currentWeekIndex < span.weekIndex + weekSpans.length;
+                    })) {
+                        bodyHTML += `<td class="timeline-cell"></td>`;
+                    }
+                }
+                weekIndex++;
+            });
+        });
+        
+        bodyHTML += '</tr>';
+    });
+    
+    return bodyHTML;
+}
+
+        // Setup tooltips
+        function setupTooltips() {
+            const tooltip = document.getElementById('tooltip');
+            const bars = document.querySelectorAll('.gantt-bar[data-tooltip]');
+            
+            bars.forEach(bar => {
+                bar.addEventListener('mouseenter', (e) => {
+                    tooltip.innerHTML = e.target.getAttribute('data-tooltip');
+                    tooltip.style.opacity = '1';
+                });
+                
+                bar.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = e.pageX + 15 + 'px';
+                    tooltip.style.top = e.pageY - 60 + 'px';
+                });
+                
+                bar.addEventListener('mouseleave', () => {
+                    tooltip.style.opacity = '0';
+                });
+            });
+        }
+
+        // Export functionality
+        
+
+        function showExportModal() {
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function hideExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+        }
+
+        function selectExportOption(option) {
+            selectedExportOption = option;
+            document.querySelectorAll('.export-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`[data-option="${option}"]`).classList.add('selected');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        async function exportGanttChart() {
+    hideExportModal();
+    showLoading();
+    
+    try {
+        // Get the gantt container
+        const ganttContainer = document.querySelector('.gantt-container');
+        
+        // Store original styles
+        const originalStyles = {
+            overflow: ganttContainer.style.overflow,
+            position: ganttContainer.style.position,
+            transform: ganttContainer.style.transform
+        };
+        
+        // Prepare container for capture
+        ganttContainer.style.overflow = 'visible';
+        ganttContainer.style.position = 'static';
+        ganttContainer.style.transform = 'none';
+        
+        // Wait for any pending renders
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Configure options based on selection
+        let options = {
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: true, // Enable logging for debugging
+            scale: 2, // High quality scaling
+            width: ganttContainer.scrollWidth,
+            height: ganttContainer.scrollHeight,
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: ganttContainer.scrollWidth,
+            windowHeight: ganttContainer.scrollHeight
+        };
+        
+        let filename = 'gantt-chart';
+        
+        switch(selectedExportOption) {
+            case 'word-landscape':
+                options.scale = 2;
+                filename = 'gantt-chart-word-landscape';
+                break;
+            case 'word-landscape-hd':
+                options.scale = 3;
+                filename = 'gantt-chart-word-landscape-hd';
+                break;
+            case 'word-a4-landscape':
+                options.scale = 2.5;
+                filename = 'gantt-chart-a4-landscape';
+                break;
+            case 'presentation':
+                options.scale = 2;
+                filename = 'gantt-chart-presentation';
+                break;
+        }
+        
+        console.log('Starting capture with options:', options);
+        console.log('Container dimensions:', ganttContainer.scrollWidth, 'x', ganttContainer.scrollHeight);
+        
+        // Capture the gantt chart directly
+        const canvas = await html2canvas(ganttContainer, options);
+        
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // Restore original styles
+        Object.assign(ganttContainer.style, originalStyles);
+        
+        // Check if canvas has content
+        if (canvas.width === 0 || canvas.height === 0) {
+            throw new Error('Canvas has no dimensions');
+        }
+        
+        // Create a new canvas with title for Word
+        const finalCanvas = document.createElement('canvas');
+        const ctx = finalCanvas.getContext('2d');
+        
+        // Set final canvas size (add space for title)
+        const titleHeight = 100;
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height + titleHeight;
+        
+        // Fill background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+        
+        // Add title
+        ctx.fillStyle = '#2d3748';
+        ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Cronograma del Proyecto - Diagrama de Gantt', finalCanvas.width / 2, 40);
+        
+        ctx.font = '16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillStyle = '#718096';
+        ctx.fillText('Proyecto de Investigación - Oct 2025 a Ene 2026', finalCanvas.width / 2, 70);
+        
+        // Draw the gantt chart
+        ctx.drawImage(canvas, 0, titleHeight);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `${filename}-${new Date().toISOString().split('T')[0]}.png`;
+        link.href = finalCanvas.toDataURL('image/png', 1.0);
+        
+        console.log('Final image data URL length:', link.href.length);
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        hideLoading();
+        
+        // Show success message
+        setTimeout(() => {
+            alert(`¡Diagrama exportado exitosamente!\n\nDimensiones: ${finalCanvas.width}x${finalCanvas.height}px\n\nPara insertar en Word:\n1. Insertar > Imágenes > Este dispositivo\n2. Selecciona el archivo descargado\n3. La imagen mantendrá su alta calidad`);
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error exporting chart:', error);
+        hideLoading();
+        
+        // Restore styles in case of error
+        const ganttContainer = document.querySelector('.gantt-container');
+        ganttContainer.style.overflow = 'hidden';
+        ganttContainer.style.position = '';
+        ganttContainer.style.transform = '';
+        
+        alert(`Error al exportar el diagrama: ${error.message}\n\nPor favor:\n1. Abre la consola del navegador (F12)\n2. Intenta exportar de nuevo\n3. Revisa los mensajes de error en la consola`);
+    }
+}
+
+// Update the default selected option
+let selectedExportOption = 'word-landscape';
+
+        // Initialize the chart
+        function initializeChart() {
+            document.getElementById('ganttHeader').innerHTML = generateTableHeader();
+            document.getElementById('ganttBody').innerHTML = generateGanttBody();
+            setupTooltips();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeChart);
+    </script>
+</body>
+</html>
