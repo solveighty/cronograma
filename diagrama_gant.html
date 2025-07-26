@@ -340,6 +340,11 @@
             font-weight: 600;
             text-transform: uppercase;
         }
+        
+        .task-priority.prioridad-media {
+            background: #ffe066 !important;
+            color: #b7791f !important;
+        }
 
         /* Timeline Headers */
         .month-header {
@@ -884,7 +889,7 @@
                 objective: 1,
                 startDate: '2025-10-01',
                 endDate: '2025-10-24',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -895,7 +900,7 @@
                 duration: 10,
                 startDate: '2025-10-01',
                 endDate: '2025-10-10',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -906,7 +911,7 @@
                 duration: 7,
                 startDate: '2025-10-11',
                 endDate: '2025-10-17',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -917,7 +922,7 @@
                 duration: 7,
                 startDate: '2025-10-18',
                 endDate: '2025-10-24',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             // Objective 2
@@ -928,7 +933,7 @@
                 objective: 2,
                 startDate: '2025-10-25',
                 endDate: '2025-11-09',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -939,7 +944,7 @@
                 duration: 7,
                 startDate: '2025-10-25',
                 endDate: '2025-10-31',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -950,7 +955,7 @@
                 duration: 5,
                 startDate: '2025-11-01',
                 endDate: '2025-11-05',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             {
@@ -961,7 +966,7 @@
                 duration: 4,
                 startDate: '2025-11-06',
                 endDate: '2025-11-09',
-                priority: 'Alta',
+                priority: 'Media',
                 progress: 0
             },
             // Objective 3
@@ -1048,7 +1053,7 @@
                 name: 'Objetivo 5: Análisis de resultados',
                 objective: 5,
                 startDate: '2025-12-25',
-                endDate: '2026-01-10',
+                endDate: '2026-01-20',
                 priority: 'Alta',
                 progress: 0
             },
@@ -1216,7 +1221,7 @@
                             </div>
                             <div class="task-meta">
                                 <span class="task-duration">${duration} días</span>
-                                <span class="task-priority">${item.priority}</span>
+                                <span class="task-priority${item.priority && item.priority.toLowerCase() === 'media' ? ' prioridad-media' : ''}">${item.priority}</span>
                             </div>
                         </div>
                     </div>
