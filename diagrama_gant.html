@@ -1300,19 +1300,32 @@
                                 let leftDays = (start - firstWeekStart) / (1000 * 60 * 60 * 24);
                                 let left = (leftDays / totalColspanDays) * 100;
 
+                                // Si la tarea inicia el mismo día que el primer día de la primera semana o el mismo día que el objetivo, empieza en 0%
+                                const parentObjective = projectData.find(obj =>
+                                    obj.type === 'objective' && obj.objective === item.objective
+                                );
+                                if (
+                                    (start.getFullYear() === firstWeekStart.getFullYear() &&
+                                     start.getMonth() === firstWeekStart.getMonth() &&
+                                     start.getDate() === firstWeekStart.getDate()) ||
+                                    (parentObjective && start.getTime() === new Date(parentObjective.startDate).getTime())
+                                ) {
+                                    left = 0;
+                                }
+
                                 // Ancho de la barra (en % del colspan)
                                 let barDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
                                 let width = (barDays / totalColspanDays) * 100;
 
                                 // Si la tarea termina el mismo día que el último día de la última semana o el mismo día que el objetivo, ocupa todo el ancho restante
-                                const parentObjective = projectData.find(obj =>
+                                const parentObjectiveEnd = projectData.find(obj =>
                                     obj.type === 'objective' && obj.objective === item.objective
                                 );
                                 if (
                                     (end.getFullYear() === lastWeekEnd.getFullYear() &&
                                      end.getMonth() === lastWeekEnd.getMonth() &&
                                      end.getDate() === lastWeekEnd.getDate()) ||
-                                    (parentObjective && end.getTime() === new Date(parentObjective.endDate).getTime())
+                                    (parentObjectiveEnd && end.getTime() === new Date(parentObjectiveEnd.endDate).getTime())
                                 ) {
                                     width = 100 - left;
                                 }
