@@ -1194,90 +1194,151 @@
         function generateGanttBody() {
             const timeline = generateWeeklyTimeline();
             let bodyHTML = '';
-            
+
             projectData.forEach(item => {
-                const weekSpans = calculateWeekSpan(item.startDate, item.endDate, timeline);
-        const isObjective = item.type === 'objective';
-        const barClass = isObjective ? `bar-objetivo-${item.objective}` : `bar-objetivo-${item.objective} subtask-bar`;
-        
-        const start = new Date(item.startDate);
-        const end = new Date(item.endDate);
-        const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        
-        const rowClass = isObjective ? `objective-row objective-row-${item.objective}` : 'task-row-subtask';
-        const cellClass = isObjective ? 'task-cell' : 'task-cell task-row-subtask';
-        
-        bodyHTML += `
-            <tr class="${rowClass}">
-                <td class="task-column ${cellClass}">
-                    <div class="task-row">
-                        <div class="task-icon ${isObjective ? `task-icon-${item.objective}` : ''}">
-                            <i class="fas ${isObjective ? 'fa-flag' : 'fa-circle'}"></i>
-                        </div>
-                        <div class="task-info">
-                            <div class="task-name">${item.name}</div>
-                            <div class="task-details">
-                                ${start.toLocaleDateString('es-ES', { timeZone: 'UTC' })} - ${end.toLocaleDateString('es-ES', { timeZone: 'UTC' })}
-                            </div>
-                            <div class="task-meta">
-                                <span class="task-duration">${duration} días</span>
-                                <span class="task-priority${item.priority && item.priority.toLowerCase() === 'media' ? ' prioridad-media' : ''}">${item.priority}</span>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-        `;
-        
-        let weekIndex = 0;
-        timeline.forEach(month => {
-            month.weeks.forEach(week => {
-                const isSpanned = weekSpans.some(span => 
-                    span.monthIndex === timeline.indexOf(month) && 
-                    span.weekIndex === month.weeks.indexOf(week)
-                );
-                
-                if (isSpanned) {
-                    const isFirstWeek = weekSpans[0].monthIndex === timeline.indexOf(month) && 
-                                      weekSpans[0].weekIndex === month.weeks.indexOf(week);
-                    
-                    if (isFirstWeek) {
-                        const spanLength = weekSpans.length;
-                        const displayText = isObjective ? `Objetivo ${item.objective}` : `${duration}d`;
-                        
-                        bodyHTML += `
-                            <td class="timeline-cell" colspan="${spanLength}">
-                                <div class="gantt-bar ${barClass}" 
-                                     style="width: calc(100% - 4px);"
-                                     data-tooltip="<strong>${item.name}</strong><br><br><strong>Duración:</strong> ${duration} días<br><strong>Período:</strong> ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}<br><strong>Prioridad:</strong> ${item.priority}">
-                                    <span style="position: relative; z-index: 1;">${displayText}</span>
-                                    <div class="progress-indicator">
-                                        <div class="progress-bar" style="width: ${item.progress}%"></div>
+                const isObjective = item.type === 'objective';
+                const barClass = isObjective ? `bar-objetivo-${item.objective}` : `bar-objetivo-${item.objective} subtask-bar`;
+
+                const start = new Date(item.startDate);
+                const end = new Date(item.endDate);
+                const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+                const rowClass = isObjective ? `objective-row objective-row-${item.objective}` : 'task-row-subtask';
+                const cellClass = isObjective ? 'task-cell' : 'task-cell task-row-subtask';
+
+                bodyHTML += `
+                    <tr class="${rowClass}">
+                        <td class="task-column ${cellClass}">
+                            <div class="task-row">
+                                <div class="task-icon ${isObjective ? `task-icon-${item.objective}` : ''}">
+                                    <i class="fas ${isObjective ? 'fa-flag' : 'fa-circle'}"></i>
+                                </div>
+                                <div class="task-info">
+                                    <div class="task-name">${item.name}</div>
+                                    <div class="task-details">
+                                        ${start.toLocaleDateString('es-ES', { timeZone: 'UTC' })} - ${end.toLocaleDateString('es-ES', { timeZone: 'UTC' })}
+                                    </div>
+                                    <div class="task-meta">
+                                        <span class="task-duration">${duration} días</span>
+                                        <span class="task-priority${item.priority && item.priority.toLowerCase() === 'media' ? ' prioridad-media' : ''}">${item.priority}</span>
                                     </div>
                                 </div>
-                            </td>
-                        `;
-                        weekIndex += spanLength - 1;
-                    }
+                            </div>
+                        </td>
+                `;
+
+                // Objetivos: igual que antes, usan colspan
+                if (isObjective) {
+                    const weekSpans = calculateWeekSpan(item.startDate, item.endDate, timeline);
+                    let weekIndex = 0;
+                    timeline.forEach(month => {
+                        month.weeks.forEach(week => {
+                            const isSpanned = weekSpans.some(span =>
+                                span.monthIndex === timeline.indexOf(month) &&
+                                span.weekIndex === month.weeks.indexOf(week)
+                            );
+                            if (isSpanned) {
+                                const isFirstWeek = weekSpans[0].monthIndex === timeline.indexOf(month) &&
+                                    weekSpans[0].weekIndex === month.weeks.indexOf(week);
+                                if (isFirstWeek) {
+                                    const spanLength = weekSpans.length;
+                                    const displayText = `Objetivo ${item.objective}`;
+                                    bodyHTML += `
+                                        <td class="timeline-cell" colspan="${spanLength}">
+                                            <div class="gantt-bar ${barClass}" 
+                                                 style="width: calc(100% - 4px);"
+                                                 data-tooltip="<strong>${item.name}</strong><br><br><strong>Duración:</strong> ${duration} días<br><strong>Período:</strong> ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}<br><strong>Prioridad:</strong> ${item.priority}">
+                                                <span style="position: relative; z-index: 1;">${displayText}</span>
+                                                <div class="progress-indicator">
+                                                    <div class="progress-bar" style="width: ${item.progress}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    `;
+                                    weekIndex += spanLength - 1;
+                                }
+                            } else {
+                                bodyHTML += `<td class="timeline-cell"></td>`;
+                            }
+                            weekIndex++;
+                        });
+                    });
                 } else {
-                    if (!weekSpans.some(span => {
-                        const currentMonthIndex = timeline.indexOf(month);
-                        const currentWeekIndex = month.weeks.indexOf(week);
-                        return currentMonthIndex === span.monthIndex && 
-                               currentWeekIndex > span.weekIndex && 
-                               currentWeekIndex < span.weekIndex + weekSpans.length;
-                    })) {
-                        bodyHTML += `<td class="timeline-cell"></td>`;
-                    }
+                    // Tareas: UNA SOLA BARRA por tarea, usando colspan
+                    // 1. Calcular en qué semanas cae la tarea
+                    const weekSpans = [];
+                    timeline.forEach((month, monthIdx) => {
+                        month.weeks.forEach((week, weekIdx) => {
+                            const weekStart = new Date(week.start);
+                            const weekEnd = new Date(week.end);
+                            if (weekEnd >= start && weekStart <= end) {
+                                weekSpans.push({
+                                    monthIndex: monthIdx,
+                                    weekIndex: weekIdx,
+                                    weekStart,
+                                    weekEnd
+                                });
+                            }
+                        });
+                    });
+
+                    let weekCounter = 0;
+                    timeline.forEach((month, monthIdx) => {
+                        month.weeks.forEach((week, weekIdx) => {
+                            // ¿Esta semana es la primera de la tarea?
+                            if (
+                                weekSpans.length > 0 &&
+                                weekSpans[0].monthIndex === monthIdx &&
+                                weekSpans[0].weekIndex === weekIdx
+                            ) {
+                                // Rango real del colspan (todas las semanas abarcadas)
+                                const firstWeekStart = weekSpans[0].weekStart;
+                                const lastWeekEnd = weekSpans[weekSpans.length - 1].weekEnd;
+                                const totalColspanDays = (lastWeekEnd - firstWeekStart) / (1000 * 60 * 60 * 24) + 1;
+
+                                // Offset izquierdo (en % del colspan)
+                                let leftDays = (start - firstWeekStart) / (1000 * 60 * 60 * 24);
+                                let left = (leftDays / totalColspanDays) * 100;
+
+                                // Ancho de la barra (en % del colspan)
+                                let barDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
+                                let width = (barDays / totalColspanDays) * 100;
+
+                                // Corrección para que la barra llegue al 100% si termina el último día de la última semana
+                                if (end.getTime() === lastWeekEnd.getTime()) {
+                                    width = 100 - left;
+                                }
+
+                                bodyHTML += `
+                                    <td class="timeline-cell" colspan="${weekSpans.length}" style="position:relative;">
+                                        <div class="gantt-bar ${barClass}" 
+                                            style="position:absolute; top:6px; left:${left}%; width:${width}%; min-width:18px; height:20px;"
+                                            data-tooltip="<strong>${item.name}</strong><br><br><strong>Duración:</strong> ${duration} días<br><strong>Período:</strong> ${start.toLocaleDateString('es-ES')} - ${end.toLocaleDateString('es-ES')}<br><strong>Prioridad:</strong> ${item.priority}">
+                                            <span style="position: relative; z-index: 1;">${duration}d</span>
+                                            <div class="progress-indicator">
+                                                <div class="progress-bar" style="width: ${item.progress}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                `;
+                                weekCounter += weekSpans.length;
+                            } else if (
+                                weekSpans.some(span => span.monthIndex === monthIdx && span.weekIndex === weekIdx)
+                            ) {
+                                // Omitir las celdas cubiertas por el colspan
+                            } else {
+                                bodyHTML += `<td class="timeline-cell"></td>`;
+                                weekCounter++;
+                            }
+                        });
+                    });
                 }
-                weekIndex++;
+
+                bodyHTML += '</tr>';
             });
-        });
-        
-        bodyHTML += '</tr>';
-    });
-    
-    return bodyHTML;
-}
+
+            return bodyHTML;
+        }
 
         // Setup tooltips
         function setupTooltips() {
