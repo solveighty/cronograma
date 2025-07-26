@@ -1304,11 +1304,20 @@
                                 let barDays = (end - start) / (1000 * 60 * 60 * 24) + 1;
                                 let width = (barDays / totalColspanDays) * 100;
 
-                                // Corrección para que la barra llegue al 100% si termina el último día de la última semana
-                                if (end.getTime() === lastWeekEnd.getTime()) {
+                                // Si la tarea termina el mismo día que el último día de la última semana o el mismo día que el objetivo, ocupa todo el ancho restante
+                                const parentObjective = projectData.find(obj =>
+                                    obj.type === 'objective' && obj.objective === item.objective
+                                );
+                                if (
+                                    (end.getFullYear() === lastWeekEnd.getFullYear() &&
+                                     end.getMonth() === lastWeekEnd.getMonth() &&
+                                     end.getDate() === lastWeekEnd.getDate()) ||
+                                    (parentObjective && end.getTime() === new Date(parentObjective.endDate).getTime())
+                                ) {
                                     width = 100 - left;
                                 }
 
+                                // Renderiza la barra de la tarea
                                 bodyHTML += `
                                     <td class="timeline-cell" colspan="${weekSpans.length}" style="position:relative;">
                                         <div class="gantt-bar ${barClass}" 
